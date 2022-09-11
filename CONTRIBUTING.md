@@ -19,13 +19,13 @@
 
 1. Синхронизуйте свой репозиторий с нашим:
 ```bash
-git pull upstream master
+git pull upstream main
 ```
 2. Создайте **новую** ветку для merge request'а:  
 ВАЖНО: Название ветки должно включать слово `contributing`, например `contributing-fixed-hello-world-test`;  
 Иначе у вас просто запустятся тесты как будто вы сдаёте задачки. 
 ```bash
-git checkout -b <your-contributing-branch-name> upstream/master
+git checkout -b <your-contributing-branch-name> upstream/main
 ```
 3. Внесите изменения и закоммитьте:
 ```bash
@@ -38,7 +38,7 @@ git push origin <your-contributing-branch-name>
 ```
 5. Зайдите в свой репозиторий на [gitlab.manytask.org](gitlab.manytask.org), нажмите слева на панели `Merge Requests -> New merge request`
 6. Выберите `source branch`: имя вашего репозитория + имя вашей ветки <your-contributing-branch-name>
-7. Выберите `target branch`: python/public-2022-fall + master
+7. Выберите `target branch`: python/public-2022-fall + main
 8. Нажмите `Compare branches and continue`
 9. Задайте название и описание вашего реквеста. Внизу страницы посмотрите изменения (вкладка Changes), если все ок, то жмите `Submit merge request`
 
@@ -46,7 +46,7 @@ git push origin <your-contributing-branch-name>
 * Мы посмотрим реквест, напишем комментарии, если они у нас будут. Вы можете продолжать вносить изменения и коммитить их прямо в этот реквест (обновится автоматически), пока остаетесь в нужной ветке
 * В любой момент вы можете переключиться обратно на код ваших задачек, и работать с ними:
 ```bash
-git checkout master
+git checkout main
 ```
 или переключиться обратно на ваш реквест, и внести в него изменения:
 ```bash

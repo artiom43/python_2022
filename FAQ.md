@@ -76,7 +76,7 @@ $ source shad_env/bin/activate  # замените здесь путь до ме
 
 Решение очень простое:
 ```shell
-$ git pull upstream master
+$ git pull upstream main
 ```
 </details>
 
