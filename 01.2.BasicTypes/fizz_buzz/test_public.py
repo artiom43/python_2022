@@ -11,7 +11,7 @@ from .fizz_buzz import get_fizz_buzz
 class Case:
     name: str
     n: int
-    expected: tp.Mapping[int, tp.Union[int, str]]
+    expected: tp.Mapping[int, int | str]
 
     def __str__(self) -> str:
         return 'test_{}'.format(self.name)

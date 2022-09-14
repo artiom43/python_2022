@@ -1,14 +1,13 @@
-from __future__ import annotations
-
 import dis
 import types
 import inspect
 import typing as tp
+from collections.abc import Callable, Generator
 import copy
 
 
 def is_input_unchanged(
-        func: tp.Callable[..., tp.Any],
+        func: Callable[..., tp.Any],
         input_args: tuple[tp.Any, ...] | None = None,
         input_kwargs: dict[tp.Any, tp.Any] | None = None
 ) -> bool:
@@ -23,12 +22,12 @@ def is_input_unchanged(
     return input_args == input_args_copy and input_kwargs == input_kwargs_copy
 
 
-def is_regexp_used(func: tp.Callable[..., tp.Any], substr: str) -> bool:
+def is_regexp_used(func: Callable[..., tp.Any], substr: str) -> bool:
     return substr in inspect.getsource(func)
 
 
 def _extract_global(
-        func: tp.Callable[..., tp.Any] | types.CodeType,
+        func: Callable[..., tp.Any] | types.CodeType,
         name: str
 ) -> tp.Callable[..., tp.Any] | None:
     if isinstance(func, types.CodeType):
@@ -42,12 +41,12 @@ def _extract_global(
 
 
 def _get_function_instructions(
-        func: tp.Callable[..., tp.Any] | types.CodeType,
+        func: Callable[..., tp.Any] | types.CodeType,
         visited_names: set[str] | None = None,
         visited_globals: set[str] | None = None,
-        base_func: tp.Union[tp.Callable[..., tp.Any] | types.CodeType] | None = None,
+        base_func: Callable[..., tp.Any] | types.CodeType | None = None,
         extra_vars: set[str] | None = None,
-) -> tp.Generator[dis.Instruction, None, None]:
+) -> Generator[dis.Instruction, None, None]:
     # extra_vars = extra_vars or dict()
 
     if base_func is None:
@@ -101,20 +100,20 @@ def _get_function_instructions(
             yield from _get_function_instructions(const, visited_names, base_func=base_func)
 
 
-def is_bytecode_op_used(func: tp.Callable[..., tp.Any], value: str) -> bool:
+def is_bytecode_op_used(func: Callable[..., tp.Any], value: str) -> bool:
     return any(
         getattr(instr, 'opname') == value for instr in _get_function_instructions(func)
     )
 
 
-def is_global_used(func: tp.Callable[..., tp.Any], value: str) -> bool:
+def is_global_used(func: Callable[..., tp.Any], value: str) -> bool:
     return any(
         getattr(instr, 'opname') == 'LOAD_GLOBAL' and getattr(instr, 'argval') == value
         for instr in _get_function_instructions(func)
     )
 
 
-def is_instruction_used(func: tp.Callable[..., tp.Any], param: str, value: str | None = None) -> bool:
+def is_instruction_used(func: Callable[..., tp.Any], param: str, value: str | None = None) -> bool:
     # if value is not None:
     return any(
         getattr(instr, param) == value for instr in _get_function_instructions(func)

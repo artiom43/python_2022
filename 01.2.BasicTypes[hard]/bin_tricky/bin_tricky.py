@@ -1,7 +1,7 @@
-import typing as tp
+from collections.abc import Sequence
 
 
-def find_median(nums1: tp.Sequence[int], nums2: tp.Sequence[int]) -> float:
+def find_median(nums1: Sequence[int], nums2: Sequence[int]) -> float:
     """
     Find median of two sorted sequences. At least one of sequences should be not empty.
     :param nums1: sorted sequence of integers

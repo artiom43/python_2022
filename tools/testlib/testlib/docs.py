@@ -1,8 +1,9 @@
 import typing as tp
 import inspect
+from collections.abc import Callable
 
 
-def is_function_docstring_exists(func: tp.Callable[..., tp.Any]) -> bool:
+def is_function_docstring_exists(func: Callable[..., tp.Any]) -> bool:
     docstring = inspect.getdoc(func)
     return docstring is not None and not set(docstring).issubset({' ', '\n'})
 

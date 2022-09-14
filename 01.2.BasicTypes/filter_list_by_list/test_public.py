@@ -1,6 +1,5 @@
 import copy
 import dataclasses
-import typing as tp
 
 import pytest
 import testlib
@@ -10,8 +9,8 @@ from .filter_list_by_list import filter_list_by_list
 
 @dataclasses.dataclass
 class Case:
-    lst_a: tp.Union[list[int], range]
-    lst_b: tp.Union[list[int], range]
+    lst_a: list[int] | range
+    lst_b: list[int] | range
     result: list[int]
 
 

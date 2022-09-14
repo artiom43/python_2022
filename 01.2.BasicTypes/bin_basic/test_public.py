@@ -1,6 +1,5 @@
 import copy
 import dataclasses
-import typing as tp
 from pathlib import Path
 
 import pytest
@@ -11,10 +10,10 @@ from .bin_basic import find_value
 
 @dataclasses.dataclass
 class Case:
-    nums: tp.Union[list[int], range]
+    nums: list[int] | range
     value: int
     result: bool
-    name: tp.Optional[str] = None
+    name: str | None = None
 
     def __str__(self) -> str:
         if self.name is not None:

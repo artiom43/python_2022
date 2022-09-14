@@ -1,7 +1,4 @@
-import typing as tp
-
-
-def get_fizz_buzz(n: int) -> list[tp.Union[int, str]]:
+def get_fizz_buzz(n: int) -> list[int | str]:
     """
     If value divided by 3 - "Fizz",
        value divided by 5 - "Buzz",
