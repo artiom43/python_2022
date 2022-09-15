@@ -52,5 +52,5 @@ check:
     - when: never
   script:
     - cp -R /opt/shad/tests tests/
-    - python3 -m checker check --contributing
+    - python3 -m checker --config /opt/shad/.course.yml check --contributing
   timeout: 30 minutes
