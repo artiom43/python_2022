@@ -119,7 +119,7 @@ $ brew install git
 
 
 #### Создание ssh-ключа
-Можно почитать [туториал гитлаба](https://gitlab.manytask.org/help/ssh/README#gitlab-and-ssh-keys) о том как создать и добавить в аккаунт ssh ключ, а можно проследовать инструкции ниже. 
+Можно почитать [туториал гитлаба](https://docs.gitlab.com/ce/user/ssh.html) о том как создать и добавить в аккаунт ssh ключ, а можно проследовать инструкции ниже. 
 Если вы используете инструкцию гитлаба, не забудьте пройти также по ссылке [declare what host](https://gitlab.manytask.org/help/ssh/README#working-with-non-default-ssh-key-pair-paths), 
 где описано как указать какой ключ использовать для подключения к гитлабу.
 
