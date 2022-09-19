@@ -27,6 +27,7 @@ TEST_CASES = [
     Case(lst_a=[1, 3], lst_b=[2, 4], result=[1, 3]),
     Case(lst_a=[2, 3], lst_b=[1, 2], result=[3]),
     Case(lst_a=[1, 1], lst_b=[1, 1], result=[]),
+    Case(lst_a=[1, 1], lst_b=[1], result=[]),
     Case(lst_a=[1, 2], lst_b=[1, 1], result=[2]),
     Case(lst_a=[1, 2], lst_b=[1, 2], result=[]),
     Case(lst_a=[2, 3], lst_b=[1, 4], result=[2, 3]),
