@@ -386,8 +386,6 @@ $ source shad_env/bin/activate   # активируем виртуальное �
 (shad_env)$ flake8 01.1.PythonTools/hello_world/  # запуск линтера и stylecheck'а
 # ...
 (shad_env)$ mypy 01.1.PythonTools/hello_world/    # запуск typecheck'а
-# ...
-(shad_env)$ mypy 01.1.PythonTools/hello_world/    # запуск typecheck'а
 ```
 
 NB: Заметьте, что запуск происходит из **корня проекта**. 
