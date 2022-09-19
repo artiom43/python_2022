@@ -68,7 +68,7 @@ def get_sum(elements: list[int]) -> int:
 # ====================================================================================================
 
 
-def get_min_max(elements: list[int], default: int | None) -> tuple[int | None, int] | None:
+def get_min_max(elements: list[int], default: int | None) -> tuple[int | None, int | None]:
     """
     :param elements: list with integer values
     :param default: default value to return if elements are empty
