@@ -133,7 +133,7 @@ DEEP_VALUES = [
 
 
 @pytest.mark.parametrize("deep_values", DEEP_VALUES, ids=str)
-def test_get_deep_values_by_id(deep_values: tuple[tp.Any, ...]) -> None:
+def test_get_deep_values_by_id(deep_values: tuple[tp.Any]) -> None:
     assert get_object_by_id(id(deep_values)) == deep_values
 
 
