@@ -1,8 +1,4 @@
 def get_hello_world() -> str:
-    """
-    :return: hello world string
-    prin
-    t(
-    """
-    return "Hello world!"
+    string_hello_world = "Hello world!"
+    return string_hello_world
 
