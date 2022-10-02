@@ -14,26 +14,26 @@ from .object_by_id import get_object_by_id
 
 
 def test_version() -> None:
-    assert '3.10.6' == sys.version.split(' ', maxsplit=1)[0], 'To do this task you need python=3.9.7'
+    assert "3.10.6" == sys.version.split(" ", maxsplit=1)[0], "To do this task you need python=3.10.6"
 
 
 def test_banned_modules() -> None:
-    for banned_module in ['weakref', '_ctypes', 'gc', 'inspect']:
+    for banned_module in ["weakref", "_ctypes", "gc", "inspect"]:
         assert not testlib.is_module_imported(
-            banned_module, Path(__file__).parent / 'object_by_id.py'
-        ), f'You should not use `{banned_module}` module'
+            banned_module, Path(__file__).parent / "object_by_id.py"
+        ), f"You should not use `{banned_module}` module"
 
 
 def test_get_object_by_id_structure() -> None:
-    assert not testlib.is_global_used(get_object_by_id, 'locals')
-    assert not testlib.is_global_used(get_object_by_id, 'globals')
+    assert not testlib.is_global_used(get_object_by_id, "locals")
+    assert not testlib.is_global_used(get_object_by_id, "globals")
 
-    assert not testlib.is_instruction_used(get_object_by_id, 'argval', 'cast')
-    assert not testlib.is_instruction_used(get_object_by_id, 'argval', 'memmove')
-    assert not testlib.is_instruction_used(get_object_by_id, 'argval', 'memset')
-    assert not testlib.is_instruction_used(get_object_by_id, 'argval', 'py_object')
-    assert not testlib.is_instruction_used(get_object_by_id, 'argval', 'get_objects')
-    assert not testlib.is_instruction_used(get_object_by_id, 'argval', 'PyObject')
+    assert not testlib.is_instruction_used(get_object_by_id, "argval", "cast")
+    assert not testlib.is_instruction_used(get_object_by_id, "argval", "memmove")
+    assert not testlib.is_instruction_used(get_object_by_id, "argval", "memset")
+    assert not testlib.is_instruction_used(get_object_by_id, "argval", "py_object")
+    assert not testlib.is_instruction_used(get_object_by_id, "argval", "get_objects")
+    assert not testlib.is_instruction_used(get_object_by_id, "argval", "PyObject")
 
 
 ###################
@@ -128,7 +128,7 @@ def test_get_tuple_by_id(tuple_values: tuple[tp.Any, ...]) -> None:
 DEEP_VALUES = [
     [1, [([34, [45]], [1, (-12.3, ["a place for your meme"])])], [(345, 34), (34, 1.2)], [3], (), (".")],
     ((1, 1-3, 3), [4, 5, (6,), [7, [8, 9]], 10, (11, 12, [13], 14), 15], 1600, 17.5),
-    [[i, f'v_{i}'*i, (i,)]*i if i % 2 else tuple(f'{j}'*j if j % 4 else j**j for j in range(i+64)) for i in range(64)],
+    [[i, f"v_{i}"*i, (i,)]*i if i % 2 else tuple(f"{j}"*j if j % 4 else j**j for j in range(i+64)) for i in range(64)],
 ]
 
 
@@ -153,7 +153,7 @@ def test_wide_cycle() -> None:
 
 
 def test_same_id_values() -> None:
-    value: str = 'test_same_id_values'
+    value: str = "test_same_id_values"
     list_: tuple[tp.Any, ...] = tuple([value] * 1024)
 
     _object = get_object_by_id(id(list_))
@@ -163,7 +163,7 @@ def test_same_id_values() -> None:
 
 
 def test_direct_cycle() -> None:
-    value: str = 'test_direct_cycle'
+    value: str = "test_direct_cycle"
     cycled_list: list[tp.Any] = [[value], [value], [value]]
     cycled_list.append(cycled_list)
 
