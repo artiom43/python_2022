@@ -12,7 +12,7 @@ import typing as tp
 class Frame:
     """
     Frame header in cpython with description
-        https://github.com/python/cpython/blob/3.9/Include/frameobject.h#L17
+        https://github.com/python/cpython/blob/3.10/Include/frameobject.h
 
     Text description of frame parameters
         https://docs.python.org/3/library/inspect.html?highlight=frame#types-and-members
@@ -58,10 +58,10 @@ class Frame:
     def call_function_op(self, arg: int) -> None:
         """
         Operation description:
-            https://docs.python.org/release/3.9.7/library/dis.html#opcode-CALL_FUNCTION
+            https://docs.python.org/release/3.10.6/library/dis.html#opcode-CALL_FUNCTION
 
         Operation realization:
-            https://github.com/python/cpython/blob/3.9/Python/ceval.c#L3496
+            https://github.com/python/cpython/blob/3.10/Python/ceval.c#4243
         """
         arguments = self.popn(arg)
         f = self.pop()
@@ -72,10 +72,10 @@ class Frame:
         Partial realization
 
         Operation description:
-            https://docs.python.org/release/3.9.7/library/dis.html#opcode-LOAD_NAME
+            https://docs.python.org/release/3.10.6/library/dis.html#opcode-LOAD_NAME
 
         Operation realization:
-            https://github.com/python/cpython/blob/3.9/Python/ceval.c#L2416
+            https://github.com/python/cpython/blob/3.10/Python/ceval.c#L2829
         """
         # TODO: parse all scopes
         self.push(self.locals[arg])
@@ -83,10 +83,10 @@ class Frame:
     def load_global_op(self, arg: str) -> None:
         """
         Operation description:
-            https://docs.python.org/release/3.9.7/library/dis.html#opcode-LOAD_GLOBAL
+            https://docs.python.org/release/3.10.6/library/dis.html#opcode-LOAD_GLOBAL
 
         Operation realization:
-            https://github.com/python/cpython/blob/3.9/Python/ceval.c#L2480
+            https://github.com/python/cpython/blob/3.10/Python/ceval.c#L2958
         """
         # TODO: parse all scopes
         self.push(self.builtins[arg])
@@ -94,46 +94,46 @@ class Frame:
     def load_const_op(self, arg: tp.Any) -> None:
         """
         Operation description:
-            https://docs.python.org/release/3.9.7/library/dis.html#opcode-LOAD_CONST
+            https://docs.python.org/release/3.10.6/library/dis.html#opcode-LOAD_CONST
 
         Operation realization:
-            https://github.com/python/cpython/blob/3.9/Python/ceval.c#L1346
+            https://github.com/python/cpython/blob/3.10/Python/ceval.c#L1871
         """
         self.push(arg)
 
     def return_value_op(self, arg: tp.Any) -> None:
         """
         Operation description:
-            https://docs.python.org/release/3.9.7/library/dis.html#opcode-RETURN_VALUE
+            https://docs.python.org/release/3.10.6/library/dis.html#opcode-RETURN_VALUE
 
         Operation realization:
-            https://github.com/python/cpython/blob/3.9/Python/ceval.c#L1911
+            https://github.com/python/cpython/blob/3.10/Python/ceval.c#L2436
         """
         self.return_value = self.pop()
 
     def pop_top_op(self, arg: tp.Any) -> None:
         """
         Operation description:
-            https://docs.python.org/release/3.9.7/library/dis.html#opcode-POP_TOP
+            https://docs.python.org/release/3.10.6/library/dis.html#opcode-POP_TOP
 
         Operation realization:
-            https://github.com/python/cpython/blob/3.9/Python/ceval.c#L1361
+            https://github.com/python/cpython/blob/3.10/Python/ceval.c#L1886
         """
         self.pop()
 
     def make_function_op(self, arg: int) -> None:
         """
         Operation description:
-            https://docs.python.org/release/3.9.7/library/dis.html#opcode-MAKE_FUNCTION
+            https://docs.python.org/release/3.10.6/library/dis.html#opcode-MAKE_FUNCTION
 
         Operation realization:
-            https://github.com/python/cpython/blob/3.9/Python/ceval.c#L3571
+            https://github.com/python/cpython/blob/3.10/Python/ceval.c#L4290
 
         Parse stack:
-            https://github.com/python/cpython/blob/3.9/Objects/call.c#L671
+            https://github.com/python/cpython/blob/3.10/Objects/call.c#L612
 
         Call function in cpython:
-            https://github.com/python/cpython/blob/3.9/Python/ceval.c#L4950
+            https://github.com/python/cpython/blob/3.10/Python/ceval.c#L4209
         """
         name = self.pop()  # the qualified name of the function (at TOS)  # noqa
         code = self.pop()  # the code associated with the function (at TOS1)
@@ -155,10 +155,10 @@ class Frame:
     def store_name_op(self, arg: str) -> None:
         """
         Operation description:
-            https://docs.python.org/release/3.9.7/library/dis.html#opcode-STORE_NAME
+            https://docs.python.org/release/3.10.6/library/dis.html#opcode-STORE_NAME
 
         Operation realization:
-            https://github.com/python/cpython/blob/3.9/Python/ceval.c#L2280
+            https://github.com/python/cpython/blob/3.10/Python/ceval.c#L2758
         """
         const = self.pop()
         self.locals[arg] = const
