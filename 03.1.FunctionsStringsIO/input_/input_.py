@@ -23,7 +23,8 @@ def input_(prompt: str | None = None,
     out.flush()
     if prompt == "$ ":
         return None
-    str = inp.readline()
-    inp.flush()
+    # inp = open(inp, 'r')
+    st = inp.read()
+    # inp.flush()
     # print(str, prompt)
-    return str.strip("\n")
+    return st.strip("\n")
