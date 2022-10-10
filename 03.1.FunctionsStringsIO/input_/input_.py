@@ -15,6 +15,8 @@ def input_(prompt: str | None = None,
     `inp` and `out` arguments are optional and should default to `sys.stdin`
     and `sys.stdout` respectively.
     """
+    # print(inp.read())
+    # print(st)
     if prompt is None:
         return None
     out.write(prompt)
@@ -24,7 +26,6 @@ def input_(prompt: str | None = None,
     if prompt == "$ ":
         return None
     # inp = open(inp, 'r')
-    st = inp.read()
     # inp.flush()
     # print(str, prompt)
-    return st.strip("\n")
+    return inp.readline().strip("\n")
