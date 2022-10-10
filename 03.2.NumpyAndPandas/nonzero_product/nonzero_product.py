@@ -9,3 +9,10 @@ def nonzero_product(matrix: npt.NDArray[np.int_]) -> int | None:
     :param matrix: array,
     :return: product value or None
     """
+    array = np.diagonal(matrix)
+    # print(array)
+    indices = np.nonzero(array)
+    # print(np.array(indices).shape)
+    if np.array(indices).shape[1] == 0:
+        return None
+    return np.prod(array[indices])
