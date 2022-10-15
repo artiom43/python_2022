@@ -76,7 +76,7 @@ class Frame:
         while index < len(list_of_instruction):
             instruction = list_of_instruction[index]
             self.index = index
-            print(instruction.opname)
+            # print(instruction.opname)
             getattr(self, instruction.opname.lower() + "_op")(instruction.argval)
             if index != self.index:
                 index = self.index
