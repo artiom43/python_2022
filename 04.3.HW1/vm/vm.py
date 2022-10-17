@@ -9,6 +9,97 @@ import types
 import typing as tp
 import operator
 
+# from types import FunctionType
+from typing import Any
+CO_VARARGS = 4
+CO_VARKEYWORDS = 8
+
+ERR_TOO_MANY_POS_ARGS = 'Too many positional arguments'
+ERR_TOO_MANY_KW_ARGS = 'Too many keyword arguments'
+ERR_MULT_VALUES_FOR_ARG = 'Multiple values for arguments'
+ERR_MISSING_POS_ARGS = 'Missing positional arguments'
+ERR_MISSING_KWONLY_ARGS = 'Missing keyword-only arguments'
+ERR_POSONLY_PASSED_AS_KW = 'Positional-only argument passed as keyword argument'
+
+
+def bind_args(func__code__: tp.Any, func__defaults__: tp.Any, func__kwdefaults__: tp.Any,
+              *args: Any, **kwargs: Any) -> dict[str, Any]:
+    """Bind values from `args` and `kwargs` to corresponding arguments of `func`
+
+    :param func: function to be inspected
+    :param args: positional arguments to be bound
+    :param kwargs: keyword arguments to be bound
+    :return: `dict[argument_name] = argument_value` if binding was successful,
+             raise TypeError with one of `ERR_*` error descriptions otherwise
+    """
+    mask = func__code__.co_flags
+    t_varargs = mask//CO_VARARGS % 2
+    t_varkwargs = mask//CO_VARKEYWORDS % 2
+    dict_arg = {}
+    dict_arg1 = {}
+    count_def = 0
+    if func__defaults__ is not None:
+        count_def = len(func__defaults__)
+    list_def = []
+    if func__defaults__ is not None:
+        for index in func__defaults__:
+            list_def.append(index)
+    index = 0
+    while index < func__code__.co_argcount and count_def - index - 1 > -1:
+        str = func__code__.co_varnames[func__code__.co_argcount - index - 1]
+        dict_arg[str] = list_def[count_def - index - 1]
+        index += 1
+    index = 0
+    for index in range(func__code__.co_posonlyargcount):
+        if func__code__.co_varnames[index] in kwargs and t_varkwargs == 0:
+            raise TypeError(ERR_POSONLY_PASSED_AS_KW)
+    while index < func__code__.co_argcount and len(args) > index:
+        dict_arg[func__code__.co_varnames[index]] = args[index]
+        bool_t = index >= func__code__.co_posonlyargcount
+        if func__code__.co_varnames[index] in kwargs and (t_varkwargs == 0 or bool_t):
+            raise TypeError(ERR_MULT_VALUES_FOR_ARG)
+        index += 1
+    for index in range(func__code__.co_posonlyargcount, func__code__.co_argcount):
+        if func__code__.co_varnames[index] in kwargs:
+            dict_arg[func__code__.co_varnames[index]] = kwargs[func__code__.co_varnames[index]]
+
+    for index in range(func__code__.co_argcount):
+        if func__code__.co_varnames[index] not in dict_arg:
+            raise TypeError(ERR_MISSING_POS_ARGS)
+    if func__code__.co_argcount < len(args) and t_varargs == 0:
+        raise TypeError(ERR_TOO_MANY_POS_ARGS)
+    if t_varargs == 1:
+        str = func__code__.co_varnames[func__code__.co_argcount + func__code__.co_kwonlyargcount]
+        dict_arg[str] = []
+        for index in range(func__code__.co_argcount, len(args)):
+            dict_arg[str].append(args[index])
+        dict_arg[str] = tuple(dict_arg[str])
+    index = 0
+    while index < func__code__.co_kwonlyargcount and func__kwdefaults__ is not None:
+        str = func__code__.co_varnames[func__code__.co_argcount + func__code__.co_kwonlyargcount - index - 1]
+        if str in func__kwdefaults__:
+            dict_arg[str] = func__kwdefaults__[str]
+        index += 1
+    for index in range(func__code__.co_argcount, func__code__.co_argcount + func__code__.co_kwonlyargcount):
+        if func__code__.co_varnames[index] in kwargs:
+            dict_arg[func__code__.co_varnames[index]] = kwargs[func__code__.co_varnames[index]]
+        elif func__code__.co_varnames[index] not in dict_arg:
+            raise TypeError(ERR_MISSING_KWONLY_ARGS)
+    dict_kwargs = {}
+    for index in range(func__code__.co_posonlyargcount, func__code__.co_argcount):
+        dict_arg1[func__code__.co_varnames[index]] = 0
+    for index in range(func__code__.co_argcount, func__code__.co_argcount + func__code__.co_kwonlyargcount):
+        dict_arg1[func__code__.co_varnames[index]] = 0
+    for indexx in kwargs:
+        if indexx not in dict_arg1:
+            dict_kwargs[indexx] = kwargs[indexx]
+    if t_varkwargs == 0:
+        if len(dict_kwargs) != 0:
+            raise TypeError(ERR_TOO_MANY_KW_ARGS)
+    else:
+        index_x = func__code__.co_argcount + func__code__.co_kwonlyargcount + t_varargs
+        dict_arg[func__code__.co_varnames[index_x]] = dict_kwargs
+    return dict_arg
 
 # from opcode import cmp_op
 
@@ -76,12 +167,20 @@ class Frame:
         while index < len(list_of_instruction):
             instruction = list_of_instruction[index]
             self.index = index
+            # if instruction.opname == "JUMP_FORWARD":
+            #     print(instruction)
+            # print(self.index)
             # print(instruction.opname)
             getattr(self, instruction.opname.lower() + "_op")(instruction.argval)
             if index != self.index:
                 index = self.index
+                if instruction.opname == "POP_JUMP_IF_TRUE":
+                    # print(self.index)
+                    pass
             else:
                 index += 1
+            # if instruction.opname == "POP_JUMP_IF_TRUE":
+            #     print(index)
         return self.return_value
 
     def call_function_op(self, arg: int) -> None:
@@ -94,6 +193,7 @@ class Frame:
         """
         arguments = self.popn(arg)
         f = self.pop()
+        # print(arguments)
         self.push(f(*arguments))
 
     def load_name_op(self, arg: str) -> None:
@@ -125,7 +225,12 @@ class Frame:
             https://github.com/python/cpython/blob/3.10/Python/ceval.c#L2958
         """
         # TODO: parse all scopes
-        self.push(self.builtins[arg])
+        if arg in self.globals:
+            self.push(self.globals[arg])
+        elif arg in self.builtins:
+            self.push(self.builtins[arg])
+        else:
+            raise NameError
 
     def load_const_op(self, arg: tp.Any) -> None:
         """
@@ -136,6 +241,46 @@ class Frame:
             https://github.com/python/cpython/blob/3.10/Python/ceval.c#L1871
         """
         self.push(arg)
+
+    def load_fast_op(self, var_num: str) -> None:
+        # print(self.locals[var_num])
+        # print(dis.cmp_op)
+        self.push(self.locals[var_num])
+
+    def load_deref_op(self) -> None:
+        pass
+
+    def load_assertion_error_op(self, op: tp.Any) -> None:
+        self.push(AssertionError)
+
+    def load_attr_op(self, namei: str) -> None:
+        element = self.pop()
+        if namei in self.locals:
+            self.push(getattr(element, self.locals[namei]))
+        elif namei in self.globals:
+            self.push(getattr(element, self.globals[namei]))
+        elif namei in self.builtins:
+            self.push(getattr(element, self.builtins[namei]))
+        else:
+            raise NameError
+
+    # def load_method_op(self):
+
+    def list_extend_op(self, index: int) -> None:
+        list_el, element = self.popn(2)
+        # print(list_el, element)
+        list.extend(list_el, element)
+        # print(list_el)
+        self.push(list_el)
+
+    def list_append_op(self, index: int) -> None:
+        list_el, element = self.popn(2)
+        list_el.append(element)
+        self.push(list_el)
+
+    def list_to_tuple_op(self) -> None:
+        list_el = self.pop()
+        self.push(tuple(list_el))
 
     def return_value_op(self, arg: tp.Any) -> None:
         """
@@ -158,6 +303,7 @@ class Frame:
         self.pop()
 
     def make_function_op(self, arg: int) -> None:
+
         """
         Operation description:
             https://docs.python.org/release/3.10.6/library/dis.html#opcode-MAKE_FUNCTION
@@ -171,15 +317,26 @@ class Frame:
         Call function in cpython:
             https://github.com/python/cpython/blob/3.10/Python/ceval.c#L4209
         """
+        func_default = None
+        func_kwdefault = None
         name = self.pop()  # the qualified name of the function (at TOS)  # noqa
         code = self.pop()  # the code associated with the function (at TOS1)
-
+        # print(bin(arg))
         # TODO: use arg to parse function defaults
+        if arg/4 % 2 == 1:
+            self.pop()
+        if arg/8 % 2 == 1:
+            self.pop()
+        if arg/2 % 2 == 1:
+            func_kwdefault = self.pop()
+        if arg % 2 == 1:
+            func_default = self.pop()
 
         def f(*args: tp.Any, **kwargs: tp.Any) -> tp.Any:
             # TODO: parse input arguments using code attributes such as co_argcount
 
-            parsed_args: dict[str, tp.Any] = {}
+            parsed_args: tp.Any = bind_args(code, func_default, func_kwdefault, *args, *kwargs)
+            # print(parsed_args)
             f_locals = dict(self.locals)
             f_locals.update(parsed_args)
 
@@ -198,6 +355,43 @@ class Frame:
         """
         const = self.pop()
         self.locals[arg] = const
+
+    def store_global_op(self, arg: str) -> None:
+        const = self.pop()
+        self.globals[arg] = const
+
+    def store_fast_op(self, varnum: str) -> None:
+        element = self.pop()
+        self.locals[varnum] = element
+
+    def set_update_op(self, index: int) -> None:
+        set_el, element = self.popn(2)
+        set.update(set_el, element)
+        self.push(set_el)
+
+    def dict_update_op(self, index: int) -> None:
+        set_el, element = self.popn(2)
+        dict.update(set_el, element)
+        self.push(set_el)
+
+    def dict_merge_op(self, index: int) -> None:
+        set_el, element = self.popn(2)
+        for index in element:
+            if index in set_el:
+                raise Exception
+        dict.update(set_el, element)
+        self.push(set_el)
+
+    def delete_name_op(self, namei: str) -> None:
+        self.locals.pop(namei)
+
+    def delete_global_op(self, namei: str) -> None:
+        self.globals.pop(namei)
+
+    def delete_fast_op(self, var_name: str) -> None:
+        del self.locals[var_name]
+
+    # def format_value_op_op(self):
 
     def inplace_add_op(self, op: tp.Any) -> None:
         number1 = self.pop()
@@ -361,6 +555,25 @@ class Frame:
         number1 = self.pop()
         self.push(number1 | number)
 
+    def build_list_op(self, count: int) -> None:
+        list1 = list(self.popn(count))
+        self.push(list1)
+
+    def build_tuple_op(self, count: int) -> None:
+        list = tuple(self.popn(count))
+        self.push(list)
+
+    def build_set_op(self, count: int) -> None:
+        list = set(self.popn(count))
+        self.push(list)
+
+    def build_map_op(self, count: int) -> None:
+        list_el = self.popn(2*count)
+        dict_el = {}
+        for index in range(count):
+            dict_el[list_el[index*2]] = list_el[index*2 + 1]
+        self.push(dict_el)
+
     def store_subscr_op(self, op: tp.Any) -> None:
         x, y, z = self.popn(3)
         y[z] = x
@@ -383,6 +596,21 @@ class Frame:
         if opname == ">=":
             self.push(first_el >= second_el)
 
+    def contains_op_op(self, invert: int) -> None:
+        first_el, second_el = self.popn(2)
+        if invert == 1:
+            self.push(first_el not in second_el)
+        else:
+            self.push(first_el in second_el)
+        pass
+
+    def is_op_op(self, invert: int) -> None:
+        first_el, second_el = self.popn(2)
+        if invert == 1:
+            self.push(first_el is not second_el)
+        else:
+            self.push(first_el is second_el)
+
     def pop_jump_if_true_op(self, target: int) -> None:
         bool_t = self.pop()
         if bool_t:
@@ -395,7 +623,7 @@ class Frame:
             self.index = target//2
 
     def jump_forward_op(self, target: int) -> None:
-        self.index += target//2
+        self.index = target//2
 
     def jump_if_not_exc_match_op(self, target: int) -> None:
         first_value, second_value = self.popn(2)
@@ -421,9 +649,6 @@ class Frame:
     def jump_absolute_op(self, target: int) -> None:
         self.index = target//2
 
-    def load_assertion_error_op(self, op: tp.Any) -> None:
-        self.push(AssertionError)
-
     def raise_varargs_op(self, argc: int) -> None:
         if argc == 0:
             raise
@@ -433,11 +658,6 @@ class Frame:
         else:
             statem1, statem = self.popn(2)
             raise statem1 from statem
-
-    def load_fast_op(self, var_num: str) -> None:
-        # print(self.locals[var_num])
-        print(dis.cmp_op)
-        self.push(id(self.locals[var_num]))
 
     def nop_op(self, op: tp.Any) -> None:
         pass
