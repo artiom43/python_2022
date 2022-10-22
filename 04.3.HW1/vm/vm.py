@@ -67,6 +67,9 @@ def bind_args(func__code__: tp.Any, func__defaults__: tp.Any, func__kwdefaults__
         if func__code__.co_varnames[index] not in dict_arg:
             raise TypeError(ERR_MISSING_POS_ARGS)
     if func__code__.co_argcount < len(args) and t_varargs == 0:
+        # print(args)
+        # print(kwargs)
+        # print(func__code__)
         raise TypeError(ERR_TOO_MANY_POS_ARGS)
     if t_varargs == 1:
         str = func__code__.co_varnames[func__code__.co_argcount + func__code__.co_kwonlyargcount]
@@ -167,7 +170,7 @@ class Frame:
         while index < len(list_of_instruction):
             instruction = list_of_instruction[index]
             self.index = index
-            # if instruction.opname == "JUMP_FORWARD":
+            # if instruction.opname == "DUP_TOP":
             #     print(instruction)
             # print(self.index)
             # print(instruction.opname)
@@ -179,6 +182,8 @@ class Frame:
                     pass
             else:
                 index += 1
+            if instruction.opname == "RETURN_VALUE":
+                return self.return_value
             # if instruction.opname == "POP_JUMP_IF_TRUE":
             #     print(index)
         return self.return_value
@@ -194,7 +199,34 @@ class Frame:
         arguments = self.popn(arg)
         f = self.pop()
         # print(arguments)
-        self.push(f(*arguments))
+        # print(arg)
+        if arg != 0:
+            self.push(f(*arguments))
+        else:
+            self.push(f())
+
+    def call_function_ex_op(self, flags: int) -> None:
+        # print(flags)
+        if flags % 2 == 0:
+            func, args = self.popn(2)
+            self.push(func(*args))
+        else:
+            func, args, kwargs = self.popn(3)
+            # print(**kwargs)
+            # a, b, c = **kwargs
+            # print(a, b, c)
+            self.push(func(**kwargs))
+
+    def call_function_kw_op(self, args: int) -> None:
+        tupl = self.pop()
+        dict = {}
+        for index in reversed(tupl):
+            tos = self.pop()
+            dict[index] = tos
+        arg_pos = args - int(len(tupl))
+        pos = self.popn(arg_pos)
+        func = self.pop()
+        self.push(func(*pos, **dict))
 
     def load_name_op(self, arg: str) -> None:
         """
@@ -245,28 +277,35 @@ class Frame:
     def load_fast_op(self, var_num: str) -> None:
         # print(self.locals[var_num])
         # print(dis.cmp_op)
+        # print(self.locals[var_num])
         self.push(self.locals[var_num])
 
-    def load_deref_op(self) -> None:
-        pass
+    # def load_deref_op(self) -> None:
+    #     pass
 
     def load_assertion_error_op(self, op: tp.Any) -> None:
         self.push(AssertionError)
 
     def load_attr_op(self, namei: str) -> None:
         element = self.pop()
-        if namei in self.locals:
-            self.push(getattr(element, self.locals[namei]))
-        elif namei in self.globals:
-            self.push(getattr(element, self.globals[namei]))
-        elif namei in self.builtins:
-            self.push(getattr(element, self.builtins[namei]))
-        else:
-            raise NameError
+        self.push(getattr(element, namei))
+        # if namei in self.locals:
+        #     self.push(getattr(element, self.locals[namei]))
+        # elif namei in self.globals:
+        #     self.push(getattr(element, self.globals[namei]))
+        # elif namei in self.builtins:
+        #     self.push(getattr(element, self.builtins[namei]))
+        # else:
+        #     print(namei)
+        #     raise NameError
 
     def load_method_op(self, namei: str) -> None:
         obj = self.pop()
         self.push(obj, getattr(obj, namei))
+
+    def load_build_class_op(self, x: tp.Any) -> None:
+        # print(self.builtins)
+        self.push(self.builtins['__build_class__'])
 
     def call_method_op(self, args: int) -> None:
         list_arg = self.popn(args)
@@ -296,7 +335,7 @@ class Frame:
         list_el.append(element)
         self.push(list_el)
 
-    def list_to_tuple_op(self) -> None:
+    def list_to_tuple_op(self, x: tp.Any) -> None:
         list_el = self.pop()
         self.push(tuple(list_el))
 
@@ -353,7 +392,7 @@ class Frame:
         def f(*args: tp.Any, **kwargs: tp.Any) -> tp.Any:
             # TODO: parse input arguments using code attributes such as co_argcount
 
-            parsed_args: tp.Any = bind_args(code, func_default, func_kwdefault, *args, *kwargs)
+            parsed_args: tp.Any = bind_args(code, func_default, func_kwdefault, *args, **kwargs)
             # print(parsed_args)
             f_locals = dict(self.locals)
             f_locals.update(parsed_args)
@@ -382,6 +421,12 @@ class Frame:
         element = self.pop()
         self.locals[varnum] = element
 
+    def store_attr_op(self, namei: str) -> None:
+        tos1, tos = self.popn(2)
+        tos.c = tos1
+        # print(a)
+        # print(tos.namei)
+
     def set_update_op(self, index: int) -> None:
         set_el, element = self.popn(2)
         set.update(set_el, element)
@@ -409,6 +454,15 @@ class Frame:
     def delete_fast_op(self, var_name: str) -> None:
         del self.locals[var_name]
 
+    def delete_attr_op(self, namei: str) -> None:
+        tos = self.pop()
+        # print(namei)
+        del tos.namei
+
+    def delete_subscr_op(self) -> None:
+        tos1, tos = self.popn(2)
+        del tos1[tos]
+
     def format_value_op(self, flags: tp.Any) -> None:
         # print(flags)
         # if (flags & 0x03) == 0x00:
@@ -435,6 +489,15 @@ class Frame:
         value = self.pop()
         format(value)
         self.push(value)
+
+    def for_iter(self, delta: int) -> None:
+        tos = self.pop()
+        next_ = next(tos, None)
+        if next_ is None:
+            self.index += delta
+        else:
+            self.push(tos)
+            self.push(next_)
 
     def inplace_add_op(self, op: tp.Any) -> None:
         number1 = self.pop()
@@ -632,6 +695,21 @@ class Frame:
             x, y, z = self.popn(3)
             self.push(slice(x, y, z))
 
+    def import_from_op(self, namei: str) -> None:
+        tos = self.pop()
+        self.push(tos)
+        self.push(getattr(tos, namei))
+
+    def import_name_op(self, namei: str) -> None:
+        level, fromlist = self.popn(2)
+        self.push(__import__(namei, fromlist=fromlist, level=level))
+
+    def import_star_op(self, x: tp.Any) -> None:
+        tos = self.pop()
+        for index in tos.__all__:
+            if not index.startswith('_'):
+                self.locals[index] = getattr(tos, index)
+
     def store_subscr_op(self, op: tp.Any) -> None:
         x, y, z = self.popn(3)
         y[z] = x
@@ -670,15 +748,17 @@ class Frame:
             self.push(first_el is second_el)
 
     def pop_jump_if_true_op(self, target: int) -> None:
-        bool_t = self.pop()
+        bool_t = self.top()
         if bool_t:
             self.index = target//2
+            self.pop()
 
     def pop_jump_if_false_op(self, target: int) -> None:
-        bool_t = self.pop()
+        bool_t = self.top()
         # print(bool_t)
         if not bool_t:
             self.index = target//2
+            self.pop()
 
     def jump_forward_op(self, target: int) -> None:
         self.index = target//2
@@ -740,7 +820,7 @@ class Frame:
 
     def dup_top_op(self, op: tp.Any) -> None:
         element = self.top()
-        self.push(id(element))
+        self.push(element)
 
     def unary_positive_op(self, op: tp.Any) -> None:
         first_element = self.pop()
@@ -761,6 +841,20 @@ class Frame:
         first_element = self.pop()
         first_element = ~first_element
         self.push(first_element)
+
+    def unpack_ex_op(self, counts: int) -> None:
+        tos = self.pop()
+        list = []
+        for index in range(len(tos)):
+            if index + 1 < counts:
+                self.push(tos[index])
+            else:
+                list.append(tos[index])
+        self.push(list)
+
+    def reraise_op(self) -> None:
+        exp = self.pop()
+        raise exp
 
     def get_iter_op(self, op: tp.Any) -> None:
         first_element = self.pop()
