@@ -264,7 +264,25 @@ class Frame:
         else:
             raise NameError
 
-    # def load_method_op(self):
+    def load_method_op(self, namei: str) -> None:
+        obj = self.pop()
+        self.push(obj, getattr(obj, namei))
+
+    def call_method_op(self, args: int) -> None:
+        list_arg = self.popn(args)
+        obj, met = self.popn(2)
+        self.push(met(*list_arg))
+
+    def build_const_key_map_op(self, count: int) -> None:
+        tuple_k = self.pop()
+        dict_ = {}
+        list_ = self.popn(count)
+        iter = 0
+        for index in tuple_k:
+            dict_[index] = list_[iter]
+            iter += 1
+        # print(dict_)
+        self.push(dict_)
 
     def list_extend_op(self, index: int) -> None:
         list_el, element = self.popn(2)
@@ -391,7 +409,32 @@ class Frame:
     def delete_fast_op(self, var_name: str) -> None:
         del self.locals[var_name]
 
-    # def format_value_op_op(self):
+    def format_value_op(self, flags: tp.Any) -> None:
+        # print(flags)
+        # if (flags & 0x03) == 0x00:
+        #     value = self.pop()
+        #     format(value)
+        #     self.push(value)
+        # if (flags & 0x03) == 0x01:
+        #     value = self.pop()
+        #     value = str(value)
+        #     format(value)
+        #     self.push(value)
+        # if (flags & 0x03) == 0x02:
+        #     value = self.pop()
+        #     value = repr(value)
+        #     format(value)
+        #     self.push(value)
+        # if (flags & 0x03) == 0x03:
+        #     value = self.pop()
+        #     value = ascii(value)
+        #     format(value)
+        #     self.push(value)
+        # if (flags & 0x04) == 0x04:
+        # fmt_spec = self.pop()
+        value = self.pop()
+        format(value)
+        self.push(value)
 
     def inplace_add_op(self, op: tp.Any) -> None:
         number1 = self.pop()
@@ -573,6 +616,21 @@ class Frame:
         for index in range(count):
             dict_el[list_el[index*2]] = list_el[index*2 + 1]
         self.push(dict_el)
+
+    def build_string_op(self, count: int) -> None:
+        list_str = self.popn(count)
+        str_ans = ""
+        for str_i in list_str:
+            str_ans += str_i
+        self.push(str_ans)
+
+    def build_slice_op(self, args: int) -> None:
+        if args == 2:
+            x, y = self.popn(2)
+            self.push(slice(x, y))
+        if args == 3:
+            x, y, z = self.popn(3)
+            self.push(slice(x, y, z))
 
     def store_subscr_op(self, op: tp.Any) -> None:
         x, y, z = self.popn(3)
