@@ -128,6 +128,7 @@ class Frame:
         self.index: int = 0
         self.data_stack: tp.Any = []
         self.return_value = None
+        self.block_stack: tp.Any = []
         self.compare_operators = [
             operator.lt,
             operator.le,
@@ -262,7 +263,10 @@ class Frame:
         elif arg in self.builtins:
             self.push(self.builtins[arg])
         else:
-            raise NameError
+            if len(self.block_stack) == 0:
+                raise NameError
+            else:
+                self.push(NameError)
 
     def load_const_op(self, arg: tp.Any) -> None:
         """
@@ -279,9 +283,6 @@ class Frame:
         # print(dis.cmp_op)
         # print(self.locals[var_num])
         self.push(self.locals[var_num])
-
-    # def load_deref_op(self) -> None:
-    #     pass
 
     def load_assertion_error_op(self, op: tp.Any) -> None:
         self.push(AssertionError)
@@ -323,6 +324,11 @@ class Frame:
         # print(dict_)
         self.push(dict_)
 
+    def map_add_op(self, i: tp.Any) -> None:
+        ma, key, value = self.popn(3)
+        dict.__setitem__(ma, key, value)
+        self.push(dict)
+
     def list_extend_op(self, index: int) -> None:
         list_el, element = self.popn(2)
         # print(list_el, element)
@@ -358,6 +364,9 @@ class Frame:
             https://github.com/python/cpython/blob/3.10/Python/ceval.c#L1886
         """
         self.pop()
+
+    def pop_block_op(self, x: tp.Any) -> None:
+        self.block_stack.pop()
 
     def make_function_op(self, arg: int) -> None:
 
@@ -432,6 +441,13 @@ class Frame:
         set.update(set_el, element)
         self.push(set_el)
 
+    def setup_finally_op(self, delta: int) -> None:
+        self.block_stack.append('try')
+
+    def setup_annotations_op(self, x: tp.Any):
+        if '__annotations__' not in self.locals:
+            self.locals['__annotations__'] = {}
+
     def dict_update_op(self, index: int) -> None:
         set_el, element = self.popn(2)
         dict.update(set_el, element)
@@ -459,15 +475,20 @@ class Frame:
         # print(namei)
         del tos.namei
 
-    def delete_subscr_op(self) -> None:
+    def delete_subscr_op(self, index: tp.Any) -> None:
         tos1, tos = self.popn(2)
         del tos1[tos]
 
     def format_value_op(self, flags: tp.Any) -> None:
-        # print(flags)
+        value = self.pop()
+        # print(flags[0](value))
+        if not flags[1] and flags[0] is not None:
+            # print(flags)
+            value = flags[0](value)
         # if (flags & 0x03) == 0x00:
         #     value = self.pop()
         #     format(value)
+        #     pass
         #     self.push(value)
         # if (flags & 0x03) == 0x01:
         #     value = self.pop()
@@ -486,7 +507,6 @@ class Frame:
         #     self.push(value)
         # if (flags & 0x04) == 0x04:
         # fmt_spec = self.pop()
-        value = self.pop()
         format(value)
         self.push(value)
 
@@ -684,7 +704,7 @@ class Frame:
         list_str = self.popn(count)
         str_ans = ""
         for str_i in list_str:
-            str_ans += str_i
+            str_ans += str(str_i)
         self.push(str_ans)
 
     def build_slice_op(self, args: int) -> None:
@@ -706,7 +726,7 @@ class Frame:
 
     def import_star_op(self, x: tp.Any) -> None:
         tos = self.pop()
-        for index in tos.__all__:
+        for index in dir(tos):
             if not index.startswith('_'):
                 self.locals[index] = getattr(tos, index)
 
@@ -765,6 +785,7 @@ class Frame:
 
     def jump_if_not_exc_match_op(self, target: int) -> None:
         first_value, second_value = self.popn(2)
+        # print("sdf")
         if first_value == second_value and isinstance(first_value, Exception):
             pass
         else:
@@ -845,12 +866,20 @@ class Frame:
     def unpack_ex_op(self, counts: int) -> None:
         tos = self.pop()
         list = []
+        list1 = []
         for index in range(len(tos)):
             if index + 1 < counts:
-                self.push(tos[index])
+                list1.append(tos[index])
             else:
                 list.append(tos[index])
-        self.push(list)
+        self.push(reversed(list))
+        for index in reversed(list1):
+            self.push(index)
+
+    def unpack_sequence_op(self, count: int) -> None:
+        tos = self.pop()
+        for index in reversed(tos):
+            self.push(index)
 
     def reraise_op(self) -> None:
         exp = self.pop()
