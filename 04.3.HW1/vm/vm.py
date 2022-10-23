@@ -444,7 +444,7 @@ class Frame:
     def setup_finally_op(self, delta: int) -> None:
         self.block_stack.append('try')
 
-    def setup_annotations_op(self, x: tp.Any):
+    def setup_annotations_op(self, x: tp.Any) -> None:
         if '__annotations__' not in self.locals:
             self.locals['__annotations__'] = {}
 
