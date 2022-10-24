@@ -109,6 +109,25 @@ TEST_CASES = [
             'STORE_NAME': 1,
         }
     ),
+    Case(
+        source_code="""
+            def f():
+                a = 1
+            f()
+            f()
+            f()
+        """,
+        op_counts={
+            'CALL_FUNCTION': 3,
+            'LOAD_CONST': 5,
+            'LOAD_NAME': 3,
+            'MAKE_FUNCTION': 1,
+            'POP_TOP': 3,
+            'RETURN_VALUE': 2,
+            'STORE_FAST': 1,
+            'STORE_NAME': 1,
+        },
+    ),
 ]
 
 
