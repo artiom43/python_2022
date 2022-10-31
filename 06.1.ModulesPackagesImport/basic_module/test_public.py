@@ -72,7 +72,10 @@ def test_submodules_wildcard_import(module_name: str, all_list: list[str]) -> No
     module = importlib.import_module(module_name)
     module_dict = module.__dict__
 
+    print()
+
     assert '__all__' in module_dict, 'You should limit `import *` via __all__'
+    # print(module_dict['__all__'])
     assert set(module_dict['__all__']) == set(all_list)
 
 
