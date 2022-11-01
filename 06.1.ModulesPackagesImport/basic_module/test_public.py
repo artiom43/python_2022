@@ -7,16 +7,14 @@ import pytest
 
 def test_modules_installed() -> None:
     try:
-        import cryptography
+        import cryptography  # noqa: F401
     except ImportError:
-        cryptography = None  # type: ignore
-    assert cryptography, 'Can not find `cryptography`. It is required?'
+        assert False, 'Can not find `cryptography`. It is required?'
 
     try:
-        import simple_pass_manager
+        import simple_pass_manager  # noqa: F401
     except ImportError:
-        simple_pass_manager = None  # type: ignore
-    assert simple_pass_manager, 'Can not find `simple_pass_manager`. It is installed?'
+        assert False, 'Can not find `simple_pass_manager`. It is installed?'
 
 
 def test_structure() -> None:
