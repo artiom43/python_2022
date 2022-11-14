@@ -1,9 +1,12 @@
-def problem01() -> dict[int, str]:
-    return {}
-
-
 def problem02() -> dict[int, str]:
     return {}
+
+
+def problem01() -> dict[int, str]:
+    return {
+        5: "Unsupported operand types for + (None and int)",
+        8: "Incompatible types in assignment (expression has type Optional[int], variable has type int)"
+    }
 
 
 def problem03() -> dict[int, str]:
