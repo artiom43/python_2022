@@ -21,11 +21,13 @@
 
 ### Некоторые моменты 
 
+Современный способ написания конфигурации к пакету: `pyproject.toml` - он требуется в этой задачке. Однако некоторые библиотеки ещё используют `setup.cfg` (тоже статическая конфигурация, довольно близкая структура) - он требуется в соседней. 
+
 * Весь код в папке будет установлен в тестирующую систему через `pip wheel` & `pip install`
-* Из [документации python](https://packaging.python.org/tutorials/packaging-projects/#configuring-metadata): `Static metadata (setup.cfg) should be preferred.`
+* Обращайтесь к [официальной документации python](https://packaging.python.org/tutorials/packaging-projects/#configuring-metadata)
 * В этом модуле используется библиотечка `PIL` (`Pillow`). Её **нет** в тестирующей системе, но можно прописать её в requires к модулю 
-* Нужно написать свой `cli`. Для этого можно использовать что угодно, но мы рекомендуем [click](https://palletsprojects.com/p/click/) (тоже нет в тестирующей системе)
-* Все сообщения нужно скрывать в картинке `lenna.png`. Чтобы получить к ней доступ после установки нужно пробросить её как `package_data` 
+* Нужно написать свой `cli`. Для этого можно использовать _что угодно_, но мы рекомендуем [click](https://palletsprojects.com/p/click/) (тоже нет в тестирующей системе, нужно установить через реквы)
+* Все сообщения нужно скрывать в картинке `lenna.png`. Чтобы получить к ней доступ после установки нужно пробросить её как `package data` 
 * Тесты без установки, скорее всего, не запустятся 
 
 ### Как запустить тесты?
@@ -71,9 +73,9 @@
 
 
 ## Полезные материалы 
-* [https://packaging.python.org/tutorials/packaging-projects/](https://packaging.python.org/tutorials/packaging-projects/)
-* [https://docs.python.org/3/tutorial/modules.html](https://packaging.python.org/tutorials/packaging-projects/)
-* [https://pythonwheels.com/](https://packaging.python.org/tutorials/packaging-projects/)
+* [документация setuptools для pyproject.toml](https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html)
+* [документация python для упаковки пакетов](https://packaging.python.org/tutorials/packaging-projects/)
+* [документация питон про модули](https://docs.python.org/3/tutorial/modules.html)
 * [про lsb](https://habr.com/ru/post/422593/)
 * [_древняя_ статья про wheels. только для общего понимания](https://habr.com/ru/post/210450/)
 * [click](https://palletsprojects.com/p/click/)

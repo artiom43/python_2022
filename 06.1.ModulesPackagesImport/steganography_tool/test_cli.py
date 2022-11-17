@@ -31,10 +31,10 @@ class TestCli:
     def test_encode_decode(self, message: str, tmp_path: Path) -> None:
         filename = tmp_path / f'{uuid.uuid1()}.png'
         code, out, err = _run(['steganography-tool', 'encode', filename.as_posix(), message])
-        assert code == 0, err
+        assert code == 0, err + out
 
         assert filename.exists()
 
         code, out, err = _run(['steganography-tool', 'decode', filename.as_posix()])
-        assert code == 0, err
+        assert code == 0, err + out
         assert out.startswith(message)
