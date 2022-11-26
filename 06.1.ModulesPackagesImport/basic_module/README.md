@@ -14,9 +14,11 @@
 
 ### Некоторые моменты 
 
+Современный способ написания конфигурации к пакету: `pyproject.toml` - он требуется в соседней задачке. Однако некоторые библиотеки ещё используют `setup.cfg` (тоже статическая конфигурация, довольно близкая структура) - он требуется в этой задачке. 
+
 * Весь код в папке будет установлен в тестирующую систему через `pip install`
 * Структурировать модули можно разными способами. Но в этом задании мы будем требовать публичный интерфейс определённого вида (см тесты)
-* Из [документации python](https://packaging.python.org/tutorials/packaging-projects/#configuring-metadata): `Static metadata (setup.cfg) should be preferred.`
+* Обращайтесь к [официальной документации setuptools](https://setuptools.pypa.io/en/latest/userguide/declarative_config.html)
 * В этом модуле используется библиотечка `cryptography`. Её **нет** в тестирующей системе, но можно прописать её в requires к модулю 
 * Это УЧЕБНЫЙ проект. НЕ стоит использовать какие-либо его части для реальной работы с паролями - это НЕ безопасно
 * Тесты без установки, скорее всего, не запустятся 
@@ -43,6 +45,7 @@
 
 
 ## Полезные материалы 
-* [https://packaging.python.org/tutorials/packaging-projects/](https://packaging.python.org/tutorials/packaging-projects/)
-* [https://docs.python.org/3/tutorial/modules.html](https://docs.python.org/3/tutorial/modules.html)
-* [https://bitwarden.com/](https://bitwarden.com/)
+* [документация setuptools для setup.cfg](https://setuptools.pypa.io/en/latest/userguide/declarative_config.html)
+* [документация python для упаковки пакетов](https://packaging.python.org/tutorials/packaging-projects/)
+* [документация питон про модули](https://docs.python.org/3/tutorial/modules.html)
+* [bitwarden.com - нормальный парольный менеджер](https://bitwarden.com/)

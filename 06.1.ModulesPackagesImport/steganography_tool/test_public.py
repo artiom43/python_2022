@@ -46,18 +46,20 @@ def test_submodules_wildcard_import() -> None:
 def test_setup_style() -> None:
     task_dir = Path(__file__).resolve().parent
 
-    setup_cfg_file = task_dir / 'setup.cfg'
-    assert setup_cfg_file.exists(), 'You should use `setup.cfg`'
+    setup_cfg_file = task_dir / 'pyproject.toml'
+    assert setup_cfg_file.exists(), 'You should use `pyproject.toml`'
 
+    # check only dummy setup.py exists
     setup_py_file = task_dir / 'setup.py'
     setup_py_n_lines = open(setup_py_file.as_posix()).read().count("\n")
-    assert setup_py_n_lines <= 4, 'You should not use `setup.py` in favor of `setup.cfg`'
+    assert setup_py_n_lines <= 4, 'You should use `pyproject.toml` in favor of `setup.py` ' \
+                                  '(only dummy `setup.py` allowed)'
 
 
 def test_module_metadata() -> None:
     module_name = 'steganography_tool'
     module_metadata = metadata.metadata(module_name)
 
-    for metadata_field in ['Author', 'Author-email', 'Summary', 'Version']:
+    for metadata_field in ['Author-email', 'Summary', 'Version', 'Requires-Python']:
         assert module_metadata[metadata_field] and module_metadata[metadata_field] != 'UNKNOWN', \
             f'You should add {metadata_field} in metadata'
