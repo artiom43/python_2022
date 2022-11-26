@@ -30,13 +30,19 @@ def test_banner_stat_ctr_value(clicks: int, shows: int, expected_ctr: float) -> 
     assert BannerStat(clicks=clicks, shows=shows).compute_ctr(0) == expected_ctr
 
 
-@pytest.mark.parametrize("clicks, shows, expected_ctr", [(1, 0, 1.0), (20, 0, 0.2), (5, 0, 0.05)])
-def test_empty_stat_compute_ctr_returns_default_ctr(clicks: int, shows: int, expected_ctr: float) -> None:
+# @pytest.mark.parametrize("clicks, shows, expected_ctr", [(1, 0, 1.0), (20, 0, 0.2), (5, 0, 0.05)])
+def test_empty_stat_compute_ctr_returns_default_ctr() -> None:
+    clicks = 1
+    shows = 0
+    expected_ctr = 1.0
     assert BannerStat(clicks=clicks, shows=shows).compute_ctr(expected_ctr) == expected_ctr
 
 
-@pytest.mark.parametrize("clicks, shows, expected_ctr", [(1, 1, 1.0), (20, 100, 0.2), (5, 100, 0.05)])
-def test_banner_stat_add_show_lowers_ctr(clicks: int, shows: int, expected_ctr: float) -> None:
+# @pytest.mark.parametrize("clicks, shows, expected_ctr", [(1, 1, 1.0), (20, 100, 0.2), (5, 100, 0.05)])
+def test_banner_stat_add_show_lowers_ctr() -> None:
+    clicks = 1
+    shows = 1
+    expected_ctr = 1.0
     banner_stat = BannerStat(clicks=clicks, shows=shows)
     first_rate = banner_stat.compute_ctr(expected_ctr)
     banner_stat.add_show()
@@ -44,8 +50,11 @@ def test_banner_stat_add_show_lowers_ctr(clicks: int, shows: int, expected_ctr: 
     assert second_rate < first_rate
 
 
-@pytest.mark.parametrize("clicks, shows, expected_ctr", [(1, 1, 1.0), (20, 100, 0.2), (5, 100, 0.05)])
-def test_banner_stat_add_click_increases_ctr(clicks: int, shows: int, expected_ctr: float) -> None:
+# @pytest.mark.parametrize("clicks, shows, expected_ctr", [(1, 1, 1.0), (20, 100, 0.2), (5, 100, 0.05)])
+def test_banner_stat_add_click_increases_ctr() -> None:
+    clicks = 1
+    shows = 1
+    expected_ctr = 1.0
     banner_stat = BannerStat(clicks=clicks, shows=shows)
     first_rate = banner_stat.compute_ctr(expected_ctr)
     banner_stat.add_click()
