@@ -34,7 +34,7 @@ def test_banner_stat_ctr_value(clicks: int, shows: int, expected_ctr: float) -> 
 def test_empty_stat_compute_ctr_returns_default_ctr() -> None:
     clicks = 1
     shows = 0
-    expected_ctr = 1.0
+    expected_ctr = TEST_DEFAULT_CTR
     assert BannerStat(clicks=clicks, shows=shows).compute_ctr(expected_ctr) == expected_ctr
 
 
@@ -83,19 +83,14 @@ def test_engine_send_click_not_fails_on_unknown_banner(test_banners: list[Banner
     banner_engine.send_click(banner_id='b5')
 
 
-def FalseRandom() -> float:
-    return 1.0
-
-
 def test_engine_with_zero_random_probability_shows_banner_with_highest_cpc(
-        test_banners: list[Banner], monkeypatch: typing.Any) -> None:
+        test_banners: list[Banner]) -> None:
     banner_engine = EpsilonGreedyBannerEngine(banner_storage=BannerStorage(test_banners, 0.1),
                                               random_banner_probability=0)
     listt = []
     for banner in test_banners:
         listt.append(banner.stat.compute_ctr(default_ctr=0.1) * banner.cost)
     index = np.argmax(np.array(listt))
-    monkeypatch.setattr(random, 'random', FalseRandom)
     # print(type(random))
     assert banner_engine.show_banner() == test_banners[index].banner_id
 
