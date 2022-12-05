@@ -1,5 +1,6 @@
+import argparse
 import socketserver
-
+import sys
 
 WIN_STEP = 100
 
@@ -38,5 +39,9 @@ class GameHandler(socketserver.StreamRequestHandler):
 
 
 if __name__ == '__main__':
-    with TCPServer(('', 59898), GameHandler) as server:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--port', default=59898)
+    args = parser.parse_args(sys.argv[1:])
+
+    with TCPServer(('localhost', int(args.port)), GameHandler) as server:
         server.serve_forever()
