@@ -1,6 +1,7 @@
 import argparse
 import socketserver
 import sys
+import time
 
 
 class TCPServer(socketserver.TCPServer):
@@ -14,16 +15,22 @@ class GameHandler(socketserver.StreamRequestHandler):
     def setup(self) -> None:
         super(GameHandler, self).setup()
         self._send('WELCOME')
-        self._send('PLAY lose')
+        self._send('PLAY long')
 
     def handle(self) -> None:
         try:
             while True:
                 command = self.rfile.readline().decode('utf-8').rstrip()
-                if command.startswith('PLAY'):
-                    self._send('MESSAGE lol')
-                    self._send('PLAYER_DEFEAT')
+                if command.startswith('QUIT'):
+                    self._send('MESSAGE Oh, ok.')
                     break
+                if command.startswith('PLAY'):
+                    word = command[5:].lower()
+                    self._send('VALID')
+
+                    time.sleep(0.5)
+
+                    self._send(f'PLAY {word}')
         except Exception as e:
             print('Exception', e)
 
