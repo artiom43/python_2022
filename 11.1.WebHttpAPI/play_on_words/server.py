@@ -20,14 +20,14 @@ class GameHandler(socketserver.StreamRequestHandler):
         super(GameHandler, self).setup()
 
         self._send('WELCOME')
-        self._send(f'PLAY {self.last_server_word}')
+        # self._send(f'PLAY {self.last_server_word}')
 
     def handle(self) -> None:
         client = f'{self.client_address} on {threading.current_thread().name}'
         print(f'Connected: {client}')
         try:
             while True:
-                command = self.rfile.readline().decode('utf-8').rstrip()
+                # command = self.rfile.readline().decode('utf-8').rstrip()
                 self._send('PLAYER_VICTORY')
         except Exception as e:
             print('Exception', e)

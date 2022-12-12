@@ -32,6 +32,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', default=59898)
     args = parser.parse_args(sys.argv[1:])
-
+    # print(sys.argv[1:])
+    print(args.port)
     with TCPServer(('localhost', int(args.port)), GameHandler) as server:
         server.serve_forever()
