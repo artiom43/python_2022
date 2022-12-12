@@ -117,7 +117,7 @@ def main(freeport: int) -> None:
                     # sock.shutdown(socket.SHUT_RDWR)
                     sock.connect(('localhost', 0))
                     break
-                word_to_respond = real_response[2]
+                word_to_respond = real_response[-1]
                 if word_to_respond in used_words:
                     sock.sendall('SURRENDER\n'.encode('utf-8'))
                     print('SURRENDER\n')

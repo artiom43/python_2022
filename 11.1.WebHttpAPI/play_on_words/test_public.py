@@ -40,50 +40,50 @@ def run_socket_server(filename: str | Path, *args: tp.Any) -> Generator[None, No
 #     assert b'Connection refused' in run.stderr
 
 
-# def test_first_step_win_server(free_port: int) -> None:
-#     """Simple server, where player win after first step"""
-#     # free_port = 48807
-#     with run_socket_server(TEST_SERVER_FOLDER / 'first_step_win_server.py', f'--port={free_port}'):
-#         run = subprocess.run(
-#             ['python', CLIENT_FILE_FULL_PATH, f'--port={free_port}'],
-#             stdout=subprocess.PIPE,
-#             stderr=subprocess.PIPE,
-#         )
-#         stdout = run.stdout.decode('utf-8')
-#         print(run.stderr)
-#         print(stdout)
-#         assert run.returncode == 0
-#
-#         # check logging works somehow
-#         assert 'WELCOME' in stdout
-#         assert 'hello' in stdout
-#         assert 'PLAY' in stdout
-#         assert 'MESSAGE' in stdout
-#         assert 'lol' in stdout
-#         assert 'PLAYER_VICTORY' in stdout
-
-
-def test_first_step_lose_server(free_port: int) -> None:
-    """Simple server, where player lose after first step"""
-    with run_socket_server(TEST_SERVER_FOLDER / 'first_step_lose_server.py', f'--port={free_port}'):
+def test_first_step_win_server(free_port: int) -> None:
+    """Simple server, where player win after first step"""
+    # free_port = 48807
+    with run_socket_server(TEST_SERVER_FOLDER / 'first_step_win_server.py', f'--port={free_port}'):
         run = subprocess.run(
             ['python', CLIENT_FILE_FULL_PATH, f'--port={free_port}'],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
         stdout = run.stdout.decode('utf-8')
-        print(stdout, "Sdfsdf")
-        assert run.returncode != 0
+        print(run.stderr)
+        print(stdout)
+        assert run.returncode == 0
 
         # check logging works somehow
         assert 'WELCOME' in stdout
-        assert 'lose' in stdout
+        assert 'hello' in stdout
         assert 'PLAY' in stdout
         assert 'MESSAGE' in stdout
         assert 'lol' in stdout
-        assert 'PLAYER_DEFEAT' in stdout
+        assert 'PLAYER_VICTORY' in stdout
 
-
+#
+# def test_first_step_lose_server(free_port: int) -> None:
+#     """Simple server, where player lose after first step"""
+#     with run_socket_server(TEST_SERVER_FOLDER / 'first_step_lose_server.py', f'--port={free_port}'):
+#         run = subprocess.run(
+#             ['python', CLIENT_FILE_FULL_PATH, f'--port={free_port}'],
+#             stdout=subprocess.PIPE,
+#             stderr=subprocess.PIPE,
+#         )
+#         stdout = run.stdout.decode('utf-8')
+#         print(stdout, "Sdfsdf")
+#         assert run.returncode != 0
+#
+#         # check logging works somehow
+#         assert 'WELCOME' in stdout
+#         assert 'lose' in stdout
+#         assert 'PLAY' in stdout
+#         assert 'MESSAGE' in stdout
+#         assert 'lol' in stdout
+#         assert 'PLAYER_DEFEAT' in stdout
+#
+#
 # def test_win_after_n_iterations_server(free_port: int) -> None:
 #     """Simple server, where player win after n steps"""
 #     with run_socket_server(TEST_SERVER_FOLDER / 'win_after_n_iterations_server.py', f'--port={free_port}'):
@@ -102,30 +102,10 @@ def test_first_step_lose_server(free_port: int) -> None:
 #         assert 'PLAY' in stdout
 #         assert 'PLAYER_VICTORY' in stdout
 #
-#
-def test_never_win_server(free_port: int) -> None:
-    """Simple server, where player can not win and should SURRENDER somewhere"""
-    with run_socket_server(TEST_SERVER_FOLDER / 'never_win_server.py', f'--port={free_port}'):
-        run = subprocess.run(
-            ['python', CLIENT_FILE_FULL_PATH, f'--port={free_port}'],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        stdout = run.stdout.decode('utf-8')
-
-        assert run.returncode != 0
-
-        # check logging works somehow
-        assert 'WELCOME' in stdout
-        assert 'long' in stdout
-        assert 'PLAY' in stdout
-        assert 'SURRENDER' in stdout
-        assert 'PLAYER_DEFEAT' in stdout
-
-#
-# def test_dummy_but_honest_server(free_port: int) -> None:
-#     """Dummy server, knows a few words, but do it honest work"""
-#     with run_socket_server(TEST_SERVER_FOLDER / 'dummy_but_honest_server.py', f'--port={free_port}'):
+# #
+# def test_never_win_server(free_port: int) -> None:
+#     """Simple server, where player can not win and should SURRENDER somewhere"""
+#     with run_socket_server(TEST_SERVER_FOLDER / 'never_win_server.py', f'--port={free_port}'):
 #         run = subprocess.run(
 #             ['python', CLIENT_FILE_FULL_PATH, f'--port={free_port}'],
 #             stdout=subprocess.PIPE,
@@ -133,17 +113,37 @@ def test_never_win_server(free_port: int) -> None:
 #         )
 #         stdout = run.stdout.decode('utf-8')
 #
-#         assert run.returncode == 0
+#         assert run.returncode != 0
 #
 #         # check logging works somehow
 #         assert 'WELCOME' in stdout
-#         assert 'dummy' in stdout
-#         assert 'MESSAGE' in stdout
+#         assert 'long' in stdout
 #         assert 'PLAY' in stdout
-#         assert 'NOT VALID' not in stdout
-#         assert 'PLAYER_VICTORY' in stdout
+#         assert 'SURRENDER' in stdout
+#         assert 'PLAYER_DEFEAT' in stdout
 #
-#
+
+def test_dummy_but_honest_server(free_port: int) -> None:
+    """Dummy server, knows a few words, but do it honest work"""
+    with run_socket_server(TEST_SERVER_FOLDER / 'dummy_but_honest_server.py', f'--port={free_port}'):
+        run = subprocess.run(
+            ['python', CLIENT_FILE_FULL_PATH, f'--port={free_port}'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        stdout = run.stdout.decode('utf-8')
+
+        assert run.returncode == 0
+        print(stdout)
+        # check logging works somehow
+        assert 'WELCOME' in stdout
+        assert 'dummy' in stdout
+        assert 'MESSAGE' in stdout
+        assert 'PLAY' in stdout
+        assert 'NOT VALID' not in stdout
+        assert 'PLAYER_VICTORY' in stdout
+
+
 # def test_slow_waiting_for_quit_server(free_port: int) -> None:
 #     """Simple server, where player can not win and should QUIT on control+c"""
 #     with run_socket_server(TEST_SERVER_FOLDER / 'slow_waiting_for_quit_server.py', f'--port={free_port}'):
@@ -166,7 +166,7 @@ def test_never_win_server(free_port: int) -> None:
 #         assert 'WELCOME' in stdout
 #         assert 'PLAY' in stdout
 #         assert 'QUIT' in stdout
-#
+
 #
 # @pytest.mark.parametrize('game_server_memory', [10, 100, 1000, 5000])
 # def test_custom_server(game_server_memory: int, free_port: int) -> None:
