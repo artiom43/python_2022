@@ -113,8 +113,18 @@ def main(freeport: int) -> None:
                     # print("sdfs")
                     break
                 if 'PLAYER_DEFEAT' in real_response:
+                    print('PLAYER_DEFEAT')
+                    # sock.shutdown(socket.SHUT_RDWR)
+                    sock.connect(('localhost', 0))
                     break
                 word_to_respond = real_response[2]
+                if word_to_respond in used_words:
+                    sock.sendall('SURRENDER\n'.encode('utf-8'))
+                    print('SURRENDER\n')
+                    response = sock.recv(1024)
+                    for rl in response.split():
+                        print(rl.decode('utf'))
+                    sock.connect(('localhost', 0))
                 used_words.add(word_to_respond)
                 # break
             # except Exception:
