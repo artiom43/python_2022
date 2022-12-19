@@ -1,4 +1,4 @@
-import datetime
+# import datetime
 
 from sqlalchemy import Column, Integer, String, DateTime, Table, ForeignKey
 from sqlalchemy.orm import relationship
@@ -18,6 +18,9 @@ class Trip(Base):  # type: ignore
 
     trip_id = Column(Integer, primary_key=True)
     # TODO: fix me
+    title = Column(String)
+    description = Column(String)
+    created_datestamp = Column(DateTime)
 
     # Relations
     users = relationship('User', secondary=UserTrip, back_populates='trips')
