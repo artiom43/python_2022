@@ -54,7 +54,6 @@ def build_graph(
         while index_of_str < len(first_word) and index_of_str < len(second_word):
             if first_word[index_of_str] != second_word[index_of_str]:
                 graph[first_word[index_of_str]].add(second_word[index_of_str])
-            else:
                 break
             index_of_str += 1
     return graph
@@ -73,8 +72,9 @@ def get_alphabet(
     :return: alphabet
     """
     graph = build_graph(words)
+    # print(graph)
     return extract_alphabet(graph)
 
 #########################
 
-# print(get_alphabet(["aab", "aac", "dee", "deeer"]))
+# print(get_alphabet(["aab", "aac", "aad"]))
