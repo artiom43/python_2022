@@ -14,6 +14,8 @@ def get_common_type(type1: type, type2: type) -> type:
         type2 = tuple
     if type1 == type2:
         return type1
+    if type1 == str or type2 == str:
+        return str
     for common_type in list_of_types:
         try:
             common_type(list_elements_of_types[type1])
@@ -32,4 +34,4 @@ def get_common_type(type1: type, type2: type) -> type:
     return str
 
 
-print(get_common_type(float, int))
+print(get_common_type(str, list))
