@@ -10,7 +10,9 @@ def convert_to_common_type(data: list[tp.Any]) -> list[tp.Any]:
     """
     bool_t = True
     for element in data:
-        if element is not None:
+        if element is None or element == "":
+            pass
+        else:
             bool_t = False
     if bool_t:
         answer_str = []
@@ -93,4 +95,4 @@ def convert_to_common_type(data: list[tp.Any]) -> list[tp.Any]:
     return answer_list
 
 
-print(convert_to_common_type([122334, [121223, 9389384], (123223, 4384934), None, ""]))
+print(convert_to_common_type([None, "", None, None]))
