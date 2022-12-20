@@ -54,7 +54,7 @@ def find_median(nums1: Sequence[int], nums2: Sequence[int]) -> float:
         answer_first_index = nums1[left_border]
         # print("sdf")
         if (len(nums1) + len(nums2)) % 2 != 0:
-            return answer_first_index
+            return float(answer_first_index)
 
     else:
         left_border = -1
@@ -122,4 +122,4 @@ def find_median(nums1: Sequence[int], nums2: Sequence[int]) -> float:
         return float(answer_first_index)
 
 
-print(find_median([1, 2], [1, 2]), type(find_median([], [2])))
+# print(find_median([1], []), type(find_median([1], [])))
