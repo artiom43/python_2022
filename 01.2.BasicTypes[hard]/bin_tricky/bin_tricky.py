@@ -21,7 +21,7 @@ def find_median(nums1: Sequence[int], nums2: Sequence[int]) -> float:
     :return: middle value if sum of sequences' lengths is odd
              average of two middle values if sum of sequences' lengths is even
     """
-    index_to_find = (len(nums1) + len(nums2)) // 2
+    index_to_find = (len(nums1) + len(nums2) + 1) // 2
     left_border = -1
     right_border = len(nums1)
     bool_t = False
@@ -39,12 +39,15 @@ def find_median(nums1: Sequence[int], nums2: Sequence[int]) -> float:
     answer_first_index = 0
     if bool_t:
         answer_first_index = nums1[left_border]
+        # print("sdf")
     else:
         left_border = -1
         right_border = len(nums2)
-        while right_border - left_border > 1:
+        # print(left_border, right_border)
+        while right_border - left_border != 1:
             middle_border = (right_border + left_border) // 2
             answer_to_call = bin_search(nums1, nums2[middle_border])
+            # print(middle_border, left_border, right_border, answer_to_call, index_to_find)
             if middle_border + 1 + answer_to_call + 1 < index_to_find:
                 left_border = middle_border
             elif middle_border + answer_to_call + 2 > index_to_find:
@@ -53,7 +56,10 @@ def find_median(nums1: Sequence[int], nums2: Sequence[int]) -> float:
                 left_border = middle_border
                 bool_t = True
                 break
+            # print(middle_border, left_border, right_border)
+        # print("sdfsdf")
         if bool_t:
+            # print("sdf")
             answer_first_index = nums2[left_border]
     index_to_find = (len(nums1) + len(nums2)) // 2 + 1
     left_border = -1
@@ -89,4 +95,7 @@ def find_median(nums1: Sequence[int], nums2: Sequence[int]) -> float:
                 break
         if bool_t:
             answer_second_index = nums2[left_border]
-    return (answer_first_index + answer_second_index) / 2
+    if (len(nums1) + len(nums2)) % 2 == 0:
+        return float((answer_first_index + answer_second_index) / 2)
+    else:
+        return float(answer_first_index)
