@@ -25,11 +25,9 @@ def extract_alphabet(
                 dfs(neighbour)
         list_of_vertex.append(vertex)
 
-    first_vertex = ""
     for vertex in graph:
-        first_vertex = vertex
-        break
-    dfs(first_vertex)
+        if vertex not in used_vertex:
+            dfs(vertex)
     answer = []
     for vertex in reversed(list_of_vertex):
         answer.append(vertex)
@@ -58,6 +56,7 @@ def build_graph(
                 graph[first_word[index_of_str]].add(second_word[index_of_str])
             else:
                 break
+            index_of_str += 1
     return graph
 
 
@@ -77,3 +76,5 @@ def get_alphabet(
     return extract_alphabet(graph)
 
 #########################
+
+# print(get_alphabet(["aab", "aac", "dee", "deeer"]))
