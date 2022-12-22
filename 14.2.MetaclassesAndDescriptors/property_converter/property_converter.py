@@ -59,8 +59,7 @@ class PropertyConverter(metaclass=MetaClass):
         #     return self.__dict__[item]
         # else:
         #     raise AttributeError
-        object.__getattribute__(self, item)
-            # pass
+        return object.__getattribute__(self, item)
 
     def __setattr__(self, key: str, value: tp.Any) -> None:
         # pass
