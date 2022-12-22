@@ -62,19 +62,19 @@ class MetaClass(type):
 
 
 class PropertyConverter(metaclass=MetaClass):
-    # def __getattr__(self, item: str) -> tp.Any:
-    #     # print("sdf")
-    #     # if item in self.__dict__:
-    #     #     return self.__dict__[item]
-    #     # else:
-    #     #     raise AttributeError
-    #     return object.__getattribute__(self, item)
-    #
-    # def __setattr__(self, key: str, value: tp.Any) -> None:
-    #     # pass
-    #     # setattr(self, key, value)
-    #     object.__setattr__(self, key, value)
+    def __getattr__(self, item: str) -> tp.Any:
+        # print("sdf")
+        # if item in self.__dict__:
+        #     return self.__dict__[item]
+        # else:
+        #     raise AttributeError
+        return object.__getattribute__(self, item)
+
+    def __setattr__(self, key: str, value: tp.Any) -> None:
+        # pass
+        # setattr(self, key, value)
+        object.__setattr__(self, key, value)
     # def __int__(self):
     #     self.__dict__['__setattr__'] = object.__setattr__
     #     self.__dict__['__getattr__'] = object.__getattribute__
-    pass
+    # pass
