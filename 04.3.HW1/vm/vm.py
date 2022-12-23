@@ -8,6 +8,7 @@ import dis
 import types
 import typing as tp
 import operator
+# from collections.abc import list_iterator
 
 # from types import FunctionType
 from typing import Any
@@ -65,6 +66,7 @@ def bind_args(func__code__: tp.Any, func__defaults__: tp.Any, func__kwdefaults__
 
     for index in range(func__code__.co_argcount):
         if func__code__.co_varnames[index] not in dict_arg:
+            # print(args, kwargs)
             raise TypeError(ERR_MISSING_POS_ARGS)
     if func__code__.co_argcount < len(args) and t_varargs == 0:
         # print(args)
@@ -142,11 +144,13 @@ class Frame:
             lambda x, y: x is not y,
             lambda x, y: issubclass(x, Exception) and issubclass(x, y),
         ]
+        self.list_of_exceptions: tp.Any = []
 
     def top(self) -> tp.Any:
         return self.data_stack[-1]
 
     def pop(self) -> tp.Any:
+        # print(self.index)
         return self.data_stack.pop()
 
     def push(self, *values: tp.Any) -> None:
@@ -207,7 +211,7 @@ class Frame:
             self.push(f())
 
     def call_function_ex_op(self, flags: int) -> None:
-        # print(flags)
+        # print(flags, 'flags')
         if flags % 2 == 0:
             func, args = self.popn(2)
             self.push(func(*args))
@@ -216,7 +220,7 @@ class Frame:
             # print(**kwargs)
             # a, b, c = **kwargs
             # print(a, b, c)
-            self.push(func(**kwargs))
+            self.push(func(*args, **kwargs))
 
     def call_function_kw_op(self, args: int) -> None:
         tupl = self.pop()
@@ -247,7 +251,12 @@ class Frame:
         elif arg in self.builtins:
             self.push(self.builtins[arg])
         else:
-            raise NameError
+            if len(self.block_stack) == 0:
+                raise NameError
+            else:
+                self.push(NameError)
+                self.index = self.block_stack[-1][1]
+                self.list_of_exceptions.append(NameError)
 
     def load_global_op(self, arg: str) -> None:
         """
@@ -264,9 +273,12 @@ class Frame:
             self.push(self.builtins[arg])
         else:
             if len(self.block_stack) == 0:
+                # self.list_of_exceptions.append(NameError)
                 raise NameError
             else:
+                self.list_of_exceptions.append(NameError)
                 self.push(NameError)
+                self.index = self.block_stack[-1][1]
 
     def load_const_op(self, arg: tp.Any) -> None:
         """
@@ -282,6 +294,7 @@ class Frame:
         # print(self.locals[var_num])
         # print(dis.cmp_op)
         # print(self.locals[var_num])
+        # print(self.locals[var_num], "sdf")
         self.push(self.locals[var_num])
 
     def load_assertion_error_op(self, op: tp.Any) -> None:
@@ -337,12 +350,18 @@ class Frame:
         self.push(list_el)
 
     def list_append_op(self, index: int) -> None:
-        list_el, element = self.popn(2)
+        # list_el, element = self.popn(2)
+        # print("index", index, "index")
+        list_el, *bag, element = self.popn(index + 1)
+        # print("   ", list_el, element, "   sdfsf")
         list_el.append(element)
         self.push(list_el)
+        for el in bag:
+            self.push(el)
 
     def list_to_tuple_op(self, x: tp.Any) -> None:
         list_el = self.pop()
+        # print(tuple(list_el))
         self.push(tuple(list_el))
 
     def return_value_op(self, arg: tp.Any) -> None:
@@ -383,6 +402,7 @@ class Frame:
         Call function in cpython:
             https://github.com/python/cpython/blob/3.10/Python/ceval.c#L4209
         """
+        # print(arg)
         func_default = None
         func_kwdefault = None
         name = self.pop()  # the qualified name of the function (at TOS)  # noqa
@@ -420,6 +440,7 @@ class Frame:
             https://github.com/python/cpython/blob/3.10/Python/ceval.c#L2758
         """
         const = self.pop()
+        # print(const, " number")
         self.locals[arg] = const
 
     def store_global_op(self, arg: str) -> None:
@@ -441,8 +462,17 @@ class Frame:
         set.update(set_el, element)
         self.push(set_el)
 
+    def set_add_op(self, index: int) -> None:
+        list_el, *bag, element = self.popn(index + 1)
+        # print("   ", list_el, bag, element, "   sdfsf")
+        set.add(list_el, element)
+        self.push(list_el)
+        for el in bag:
+            self.push(el)
+
     def setup_finally_op(self, delta: int) -> None:
-        self.block_stack.append('try')
+        # print("sdf")
+        self.block_stack.append(['try', delta // 2])
 
     def setup_annotations_op(self, x: tp.Any) -> None:
         if '__annotations__' not in self.locals:
@@ -470,10 +500,10 @@ class Frame:
     def delete_fast_op(self, var_name: str) -> None:
         del self.locals[var_name]
 
-    def delete_attr_op(self, namei: str) -> None:
+    def delete_attr_op(self, namei: str) -> None:    # maybe not working since work only in one test
         tos = self.pop()
-        # print(namei)
-        del tos.namei
+        # print(namei, tos)
+        setattr(tos, namei, None)
 
     def delete_subscr_op(self, index: tp.Any) -> None:
         tos1, tos = self.popn(2)
@@ -510,14 +540,33 @@ class Frame:
         format(value)
         self.push(value)
 
-    def for_iter(self, delta: int) -> None:
-        tos = self.pop()
-        next_ = next(tos, None)
-        if next_ is None:
-            self.index += delta
+    def for_iter_op(self, delta: int) -> None:
+        tos = self.top()
+        tr = iter(range(2))
+        # print(type(tr))
+        if type(tos) == type(tr):
+
+            try:
+                next_ = tos.__next__()
+                self.push(next_)
+                # print(type(tos))
+                # print("Sdf")
+            except StopIteration:
+                # self.push(tos)
+                # print(delta)
+                self.index = delta // 2
+                self.pop()
         else:
-            self.push(tos)
-            self.push(next_)
+            try:
+                next_ = tos.__next__()
+                self.push(next_)
+                # print(type(tos))
+                # print("Sdf")
+            except StopIteration:
+                # self.push(tos)
+                # print(delta)
+                self.index = delta // 2
+                self.pop()
 
     def inplace_add_op(self, op: tp.Any) -> None:
         number1 = self.pop()
@@ -619,7 +668,17 @@ class Frame:
     def binary_subscr_op(self, op: tp.Any) -> None:
         number = self.pop()
         number1 = self.pop()
-        self.push(number1[number])
+        try:
+            self.push(number1[number])
+        except IndexError as e:
+            if len(self.block_stack) == 0:
+                raise e
+            else:
+                self.push(number1)
+                self.push(number)
+                self.push(e)
+                self.index = self.block_stack[-1][1]
+                self.list_of_exceptions.append(e)
 
     def inplace_lshift_op(self, op: tp.Any) -> None:
         number1 = self.pop()
@@ -683,6 +742,8 @@ class Frame:
 
     def build_list_op(self, count: int) -> None:
         list1 = list(self.popn(count))
+        # self.pop()
+        # print(list1)
         self.push(list1)
 
     def build_tuple_op(self, count: int) -> None:
@@ -690,8 +751,8 @@ class Frame:
         self.push(list)
 
     def build_set_op(self, count: int) -> None:
-        list = set(self.popn(count))
-        self.push(list)
+        listt = set(self.popn(count))
+        self.push(listt)
 
     def build_map_op(self, count: int) -> None:
         list_el = self.popn(2*count)
@@ -768,28 +829,35 @@ class Frame:
             self.push(first_el is second_el)
 
     def pop_jump_if_true_op(self, target: int) -> None:
-        bool_t = self.top()
+        bool_t = self.pop()
         if bool_t:
             self.index = target//2
-            self.pop()
+            # self.pop()
 
     def pop_jump_if_false_op(self, target: int) -> None:
-        bool_t = self.top()
+        bool_t = self.pop()
         # print(bool_t)
         if not bool_t:
             self.index = target//2
-            self.pop()
+            # self.pop()
+
+    def pop_except_op(self, delta: int) -> None:
+        # print(delta)
+        pass
 
     def jump_forward_op(self, target: int) -> None:
         self.index = target//2
 
     def jump_if_not_exc_match_op(self, target: int) -> None:
         first_value, second_value = self.popn(2)
-        # print("sdf")
-        if first_value == second_value and isinstance(first_value, Exception):
-            pass
+        # print(first_value, second_value)
+        if isinstance(first_value, second_value) or first_value == second_value:
+            self.push(first_value)
+            # print("sdf")
+            self.push(second_value)
         else:
             self.index = target//2
+            # print("sdf")
 
     def jump_if_true_or_pop_op(self, target: int) -> None:
         first_element = self.top()
@@ -808,15 +876,33 @@ class Frame:
     def jump_absolute_op(self, target: int) -> None:
         self.index = target//2
 
-    def raise_varargs_op(self, argc: int) -> None:
+    def raise_varargs_op(self, argc: int) -> None:   # work at three cases
+        # print("sdf")
+        # print(self.index)
         if argc == 0:
-            raise
+            raise self.list_of_exceptions[-1]
         elif argc == 1:
             statem = self.pop()
-            raise statem
+            self.list_of_exceptions.append(statem)
+            # print(statem)
+            if len(self.block_stack) == 0:
+                raise statem
+            else:
+                # print("sdf")
+                self.push(statem)
+                # self.push(statem)
+                self.index = self.block_stack[-1][1]
         else:
+            # print("sdf")
             statem1, statem = self.popn(2)
-            raise statem1 from statem
+            self.list_of_exceptions.append(statem1)
+            if len(self.block_stack) == 0:
+                raise statem1 from statem
+            else:
+                # self.push(statem1)
+                # self.push(statem)
+                self.push(statem1(statem))
+                self.index = self.block_stack[-1][1]
 
     def nop_op(self, op: tp.Any) -> None:
         pass
@@ -841,6 +927,7 @@ class Frame:
 
     def dup_top_op(self, op: tp.Any) -> None:
         element = self.top()
+        # print("sdf")
         self.push(element)
 
     def unary_positive_op(self, op: tp.Any) -> None:
@@ -865,29 +952,50 @@ class Frame:
 
     def unpack_ex_op(self, counts: int) -> None:
         tos = self.pop()
-        list = []
+        # print(tos, "   ")
+        listt = []
         list1 = []
+        list2 = []
         for index in range(len(tos)):
-            if index + 1 < counts:
+            if index < counts % 256:
                 list1.append(tos[index])
+            elif len(tos) - index <= counts // 256:
+                list2.append(tos[index])
             else:
-                list.append(tos[index])
-        self.push(reversed(list))
+                listt.append(tos[index])
+        # print(list1, list, list2)
+        wert = 0
+        for index in reversed(list2):
+            self.push(index)
+            # print(index)
+        # print(listt)
+        self.push(listt)
+        # print(listt.reverse())
+        # print(listt)
+        wert += 1
         for index in reversed(list1):
             self.push(index)
+            # print(index)
+            wert += 1
+        # print("number ", wert, " ")
 
     def unpack_sequence_op(self, count: int) -> None:
         tos = self.pop()
         for index in reversed(tos):
             self.push(index)
 
-    def reraise_op(self) -> None:
+    def reraise_op(self, tr: int) -> None:    # maybe not working no test is failed because of this
         exp = self.pop()
+        # print("sdf")
         raise exp
+
+    def extended_arg_op(self, ext: tp.Any) -> None:
+        pass
 
     def get_iter_op(self, op: tp.Any) -> None:
         first_element = self.pop()
         first_element = iter(first_element)
+        # print("sdf")
         self.push(first_element)
 
     def get_yield_from_iter_op(self, op: tp.Any) -> None:
